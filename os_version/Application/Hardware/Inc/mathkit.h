@@ -33,4 +33,9 @@ void MatrixesMultiply(float *MatrixC, float *MatrixA, float *MatrixB, uint8_t ro
 
 void GaussNewton_LM(Vec3d_t input[6], Vec3d_t* offset, Vec3d_t* scale);
 
+Vec4d_t vec4_add(Vec4d_t vec1, Vec4d_t vec2);
+Vec4d_t vec4_scale(Vec4d_t vec, float scale);
+Vec4d_t vec3_add(Vec3d_t vec1, Vec3d_t vec2);
+Vec4d_t vec3_scale(Vec3d_t vec, float scale);
+
 #endif

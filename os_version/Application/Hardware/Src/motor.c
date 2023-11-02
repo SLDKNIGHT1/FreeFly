@@ -3,39 +3,39 @@
 
 void Motor_Init()
 {
-	GPIO_InitTypeDef GPIO_InitStructure;   //ÉùÃ÷Ò»¸ö½á¹¹Ìå±äÁ¿£¬ÓÃÀ´³õÊ¼»¯GPIO
+	GPIO_InitTypeDef GPIO_InitStructure;   //ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½GPIO
 
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;//ÉùÃ÷Ò»¸ö½á¹¹Ìå±äÁ¿£¬ÓÃÀ´³õÊ¼»¯¶¨Ê±Æ÷
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 
-	TIM_OCInitTypeDef TIM_OCInitStructure;//¸ù¾ÝTIM_OCInitStructÖÐÖ¸¶¨µÄ²ÎÊý³õÊ¼»¯ÍâÉèTIMx
+	TIM_OCInitTypeDef TIM_OCInitStructure;//ï¿½ï¿½ï¿½ï¿½TIM_OCInitStructï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ä²ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½TIMx
 
-	/* ¿ªÆôÊ±ÖÓ */
+	/* ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ */
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
 
-	/*  ÅäÖÃGPIOµÄÄ£Ê½ºÍIO¿Ú */
+	/*  ï¿½ï¿½ï¿½ï¿½GPIOï¿½ï¿½Ä£Ê½ï¿½ï¿½IOï¿½ï¿½ */
 	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_6;// PC6
 	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;//¸´ÓÃÍÆÍìÊä³ö
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	GPIO_Init(GPIOC,&GPIO_InitStructure);
 	GPIOC->AFR[0] |= 2 << 24; 
 	
-	//TIM3¶¨Ê±Æ÷³õÊ¼»¯
-	//PWM ÆµÂÊ 50Hz = 84 000 000/(83+1)/(19999+1)
-	TIM_TimeBaseInitStructure.TIM_Period = 19999; //×Ô¶¯ÖØ×°ÔØ¼Ä´æÆ÷ÖÜÆÚARR 
-	TIM_TimeBaseInitStructure.TIM_Prescaler = 83;//TIM3¼ÆÊýÆ÷Ê±ÖÓÆµÂÊÔ¤·ÖÆµÖµPSC
-	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;//ÉèÖÃÊ±ÖÓ·Ö¸î:TDTS = Tck_tim
-	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;	//TIMÏòÉÏ¼ÆÊýÄ£Ê½
+	//TIM3ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
+	//PWM Æµï¿½ï¿½ 50Hz = 84 000 000/(83+1)/(19999+1)
+	TIM_TimeBaseInitStructure.TIM_Period = 19999; //ï¿½Ô¶ï¿½ï¿½ï¿½×°ï¿½Ø¼Ä´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ARR 
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 83;//TIM3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Æµï¿½ï¿½Ô¤ï¿½ï¿½ÆµÖµPSC
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ó·Ö¸ï¿½:TDTS = Tck_tim
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;	//TIMï¿½ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½Ä£Ê½
 	TIM_TimeBaseInit(TIM3, & TIM_TimeBaseInitStructure);
 
-	//PWM³õÊ¼»¯	  //¸ù¾ÝTIM_OCInitStructÖÐÖ¸¶¨µÄ²ÎÊý³õÊ¼»¯ÍâÉèTIMx
+	//PWMï¿½ï¿½Ê¼ï¿½ï¿½	  //ï¿½ï¿½ï¿½ï¿½TIM_OCInitStructï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ä²ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½TIMx
 	TIM_OCInitStructure.TIM_OCMode=TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OutputState=TIM_OutputState_Enable;//PWMÊä³öÊ¹ÄÜ
+	TIM_OCInitStructure.TIM_OutputState=TIM_OutputState_Enable;//PWMï¿½ï¿½ï¿½Ê¹ï¿½ï¿½
 	TIM_OCInitStructure.TIM_OCPolarity=TIM_OCPolarity_High;
 
 	TIM_OC1Init(TIM3,&TIM_OCInitStructure);
-	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);//Ê¹ÄÜ»òÕßÊ§ÄÜTIMxÔÚCCR1ÉÏµÄÔ¤×°ÔØ¼Ä´æÆ÷
-	TIM_Cmd(TIM3,ENABLE);//Ê¹ÄÜ»òÕßÊ§ÄÜTIMxÍâÉè
+	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);//Ê¹ï¿½Ü»ï¿½ï¿½ï¿½Ê§ï¿½ï¿½TIMxï¿½ï¿½CCR1ï¿½Ïµï¿½Ô¤×°ï¿½Ø¼Ä´ï¿½ï¿½ï¿½
+	TIM_Cmd(TIM3,ENABLE);//Ê¹ï¿½Ü»ï¿½ï¿½ï¿½Ê§ï¿½ï¿½TIMxï¿½ï¿½ï¿½ï¿½
 	TIM3->CR1|=(1<<7);
 }
 
@@ -44,3 +44,50 @@ void Motor_SetDutyCycle(uint32_t Compare1)
 	TIM3->CCR1 = Compare1;
 }
 
+void Motor_control(uint32_t motor1, uint32_t motor2, uint32_t motor3, uint32_t motor4)
+{
+	switch(motor1)
+	{
+		case 0:
+			break;
+		case 1:
+			TIM3->CCR1 += 1000;
+			break;
+		case -1:
+			TIM3->CCR1 -= 1000;
+			break;
+	}
+	switch(motor2)
+	{
+		case 0:
+			break;
+		case 1:
+			TIM3->CCR2 += 1000;
+			break;
+		case -1:
+			TIM3->CCR2 -= 1000;
+			break;
+	}
+	switch(motor3)
+	{
+		case 0:
+			break;
+		case 1:
+			TIM3->CCR3 += 1000;
+			break;
+		case -1:
+			TIM3->CCR3 -= 1000;
+			break;
+	}
+	switch(motor4)
+	{
+		case 0:
+			break;
+		case 1:
+			TIM3->CCR4 += 1000;
+			break;
+		case -1:
+			TIM3->CCR4 -= 1000;
+			break;
+	}
+}

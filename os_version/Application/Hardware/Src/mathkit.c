@@ -396,3 +396,41 @@ void GaussNewton_LM(Vec3d_t input[6], Vec3d_t* offset, Vec3d_t* scale)
 	scale->y = beta[4];
 	scale->z = beta[5];
 }
+
+Vec4d_t vec4_add(Vec4d_t vec1, Vec4d_t vec2)
+{
+	vec1.w += vec2.w;
+	vec1.x += vec2.x;
+	vec1.y += vec2.y;
+	vec1.z += vec2.z;
+
+	return vec1;
+}
+
+Vec4d_t vec4_scale(Vec4d_t vec, float scale)
+{
+	vec.w *= scale;
+	vec.x *= scale;
+	vec.y *= scale;
+	vec.z *= scale;
+
+	return vec;
+}
+
+Vec3d_t vec3_add(Vec3d_t vec1, Vec3d_t vec2)
+{
+	vec1.x += vec2.x;
+	vec1.y += vec2.y;
+	vec1.z += vec2.z;
+
+	return vec1;
+}
+
+Vec3d_t vec3_scale(Vec3d_t vec, float scale)
+{
+	vec.x *= scale;
+	vec.y *= scale;
+	vec.z *= scale;
+
+	return vec;
+}

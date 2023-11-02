@@ -19,6 +19,7 @@
 #include "mathkit.h"
 #include "motor.h"
 #include "receiver.h"
+#include "pid.h"
 
 #define TASK_STK_LEN 0x0800
 #define TASK_STK_LEN_2 0x0600

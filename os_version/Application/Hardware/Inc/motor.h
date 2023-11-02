@@ -5,5 +5,6 @@
 
 void Motor_Init(void);
 void Motor_SetDutyCycle(uint32_t);
+void Motor_control(uint32_t, uint32_t, uint32_t, uint32_t);
 
 #endif
