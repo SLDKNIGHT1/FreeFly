@@ -36,163 +36,12 @@ OS_STK Task9Stk[TASK_STK_LEN];
 
 uint16_t times;
 
-extern Vec3d_t acc_offset, acc_scale, gyro_offset, gyro_filter[2], mag_offset, mag_scale;
+extern vec3d_t acc_offset, acc_scale, gyro_offset, gyro_filter[2], mag_offset, mag_scale;
 
 extern void My_Systick_Config(uint32_t reload_value);
 
-void task_led_on(void *pdata)
-{
-	while(1)
-	{
-		led_on();
-		OSTimeDly(1000);
-	}
-}
 
-void task_led_off(void *pdata)
-{
-	while(1)
-	{
-		led_off();
-		OSTimeDly(2000);
-	}
-}
-
-void task_peripheral_init(void *pdata)
-{
-	BluetoothInit();
-	printf("Bluetooth init finished!\n");
-	times++;
-
-	MyI2C_Init();
-	printf("I2C init finished!\n");
-	times++;
-	
-	GY86Init();
-	printf("GY86 init finished!\n");
-	times++;
-	
-	
-	TIM1_init();
-	Motor_Init();
-	
-	// OSTimeDly(1000);
-
-//	TIM_SetCompare1(TIM3, 2000);
-//	OSTimeDly(4000);
-//	TIM_SetCompare1(TIM3, 1000);
-//	OSTimeDly(4000);                                                
-	
-	printf("Initilization finished!\n");
-	OSTaskDel(OS_PRIO_SELF);
-}
-
-void task_MPU6050(void *pdata)
-{
-	// AccCalibration(&acc_offset, &acc_scale);
-	// GyroCalibration(&gyro_offset, &gyro_filter[2]);
-	// MagCalibration(&mag_offset, &mag_scale);
-	while(1)
-	{
-		Vec3d_t acc;
-		// GetAccData(&acc);
-		// printf("acc: %f, %f, %f\n", acc.x, acc.y, acc.z);
-
-		Vec3d_t gyro;
-		// GetGyroData(&gyro);
-		// printf("gyro: %f, %f, %f\n", gyro.x, gyro.y, gyro.z);
-
-		Vec3d_t mag;
-		GetMagData(&mag);
-		float modulus = Vec3Modulus(mag);
-		// printf("%f,%f,%f\n", mag.x, mag.y, mag.z);
-		printf("mag: %f, %f, %f, M:%f\n", mag.x, mag.y, mag.z, modulus);
-		
-		OSTimeDly(100);
-	}
-}
-
-void task_attitude_gyro(void *pdata)
-{
-	// GyroCalibration(&gyro_offset, &gyro_filter[2]);
-	printf("gyro_offset: %f, %f, %f\n", gyro_offset.x, gyro_offset.y, gyro_offset.z);
-	Vec4d_t q0 = {1, 0, 0, 0}, q1;
-	Vec3d_t gyro0 = {0, 0, 0}, gyro1, euler = {0, 0, 0};
-	uint32_t t1, t2;
-	while(1)
-	{
-		t1 = OSTimeGet();
-		GetGyroData(&gyro1);
-		// printf("gyro: %f, %f, %f\n", gyro1.x, gyro1.y, gyro1.z);
-		GyroUpdateQuat(&q0, &q1, &gyro0, &gyro1, 0.001);
-		// printf("q: %f, %f, %f, %f\n", q1.w, q1.x, q1.y, q1.z);
-		q0 = q1;
-		gyro0 = gyro1;
-		QuaterToEuler(&q0, &euler);
-		// RadToDeg(&euler);
-		printf("euler: %f, %f, %f\n", euler.x, euler.y, euler.z);	// a printf takes 4 ticks
-		t2 = OSTimeGet();
-		// printf("ticks: %d %d %d\n",t1,t2,t2-t1);
-		// OSTimeDly(10);
-	}
-}
-
-void task_attitude_acc(void *pdata)
-{
-	// AccCalibration(&acc_offset, &acc_scale);
-	// GyroCalibration(&gyro_offset, &gyro_filter[2]);
-	printf("gyro_offset: %f, %f, %f\n", gyro_offset.x, gyro_offset.y, gyro_offset.z);
-	printf("acc_offset: %f, %f, %f\n", acc_offset.x, acc_offset.y, acc_offset.z);
-	Vec3d_t acc_data = {0, 0, 0}, gyro_data, euler = {0, 0, 0};
-	Vec4d_t q0 = {1, 0, 0, 0}, q1;
-	uint32_t t1, t2;
-	while(1)
-	{
-		t1 = OSTimeGet();
-		GetAccData(&acc_data);
-		// printf("acc: %f, %f, %f\n", acc_data.x, acc_data.y, acc_data.z);
-		GetGyroData(&gyro_data);
-		AccUpdateQuat(&q0, &q1, &acc_data, &gyro_data, 0.001);
-		// printf("q: %10f, %10f, %10f, %10f\n", q1.w, q1.x, q1.y, q1.z);
-		q0 = q1;
-		QuaterToEuler(&q0, &euler);
-		// RadToDeg(&euler);
-		printf("euler: %10f, %10f, %10f\n", euler.x, euler.y, euler.z);
-		t2 = OSTimeGet();
-		OSTimeDly(10);
-	}
-}
-
-void task_attitude_acc_mag(void *pdata)
-{
-	// AccCalibration(&acc_offset, &acc_scale);
-	// GyroCalibration(&gyro_offset, &gyro_filter[2]);
-	// printf("gyro_offset: %f, %f, %f\n", gyro_offset.x, gyro_offset.y, gyro_offset.z);
-	// printf("acc_offset: %f, %f, %f\n", acc_offset.x, acc_offset.y, acc_offset.z);
-	Vec3d_t acc_data = {0, 0, 0}, mag_data, gyro_data, euler = {0, 0, 0};
-	Vec4d_t q0 = {1, 0, 0, 0}, q1;
-	uint32_t t1, t2;
-	while(1)
-	{
-		t1 = OSTimeGet();
-		GetAccData(&acc_data);
-		Vec3Norm(&acc_data);
-		GetMagData(&mag_data);
-		Vec3Norm(&mag_data);
-		// printf("acc: %f, %f, %f\n", acc_data.x, acc_data.y, acc_data.z);
-		GetGyroData(&gyro_data);
-		AccMagUpdateQuat(&q0, &q1, &acc_data, &gyro_data, &mag_data, 0.001);
-		// printf("q: %10f, %10f, %10f, %10f\n", q1.w, q1.x, q1.y, q1.z);
-		q0 = q1;
-		QuaterToEuler(&q0, &euler);
-		// RadToDeg(&euler);
-		printf("euler: %10f, %10f, %10f\n", euler.x, euler.y, euler.z);
-		t2 = OSTimeGet();
-		OSTimeDly(10);
-	}
-}
-
-void SendAnotc(Vec3d_t acc, Vec3d_t gyro, Vec3d_t mag, Vec3d_t angle)
+void SendAnotc(vec3d_t acc, vec3d_t gyro, vec3d_t mag, vec3d_t angle)
 {
 	// send attitude data to anotc v2.6
 	uint8_t sum;
@@ -242,10 +91,162 @@ void SendAnotc(Vec3d_t acc, Vec3d_t gyro, Vec3d_t mag, Vec3d_t angle)
 	}
 }
 
+
+void task_led_on(void *pdata)
+{
+	while(1)
+	{
+		led_on();
+		OSTimeDly(1000);
+	}
+}
+
+void task_led_off(void *pdata)
+{
+	while(1)
+	{
+		led_off();
+		OSTimeDly(2000);
+	}
+}
+
+void task_peripheral_init(void *pdata)
+{
+	BluetoothInit();
+	printf("Bluetooth init finished!\n");
+	times++;
+
+	MyI2C_Init();
+	printf("I2C init finished!\n");
+	times++;
+	
+	GY86Init();
+	printf("GY86 init finished!\n");
+	times++;
+	
+	TIM1_init();
+	printf("Receiver init finished!\n");
+	times++;
+
+	Motor_Init();
+	printf("Motor init finished!\n");
+	times++;
+
+	ESC_Unlock();
+	printf("ESC unlock finished!\n");
+	times++;
+
+	printf("Initilization finished!\n");
+	OSTaskDel(OS_PRIO_SELF);
+}
+
+void task_MPU6050(void *pdata)
+{
+	// AccCalibration(&acc_offset, &acc_scale);
+	// GyroCalibration(&gyro_offset, &gyro_filter[2]);
+	// MagCalibration(&mag_offset, &mag_scale);
+	while(1)
+	{
+		vec3d_t acc;
+		// GetAccData(&acc);
+		// printf("acc: %f, %f, %f\n", acc.x, acc.y, acc.z);
+
+		vec3d_t gyro;
+		// GetGyroData(&gyro);
+		// printf("gyro: %f, %f, %f\n", gyro.x, gyro.y, gyro.z);
+
+		vec3d_t mag;
+		GetMagData(&mag);
+		float modulus = Vec3Modulus(mag);
+		// printf("%f,%f,%f\n", mag.x, mag.y, mag.z);
+		printf("mag: %f, %f, %f, M:%f\n", mag.x, mag.y, mag.z, modulus);
+		
+		OSTimeDly(100);
+	}
+}
+
+void task_attitude_gyro(void *pdata)
+{
+	// GyroCalibration(&gyro_offset, &gyro_filter[2]);
+	vec4d_t q0 = {1, 0, 0, 0}, q1;
+	vec3d_t gyro0 = {0, 0, 0}, gyro1, acc, mag, euler = {0, 0, 0};
+	uint32_t t1, t2;
+	while(1)
+	{
+		t1 = OSTimeGet();
+		GetAccData(&acc);
+		GetMagData(&mag);
+		GetGyroData(&gyro1);
+
+		// printf("gyro: %f, %f, %f\n", gyro1.x, gyro1.y, gyro1.z);
+		GyroUpdateQuat(&q0, &q1, &gyro0, &gyro1, 0.001);
+		// printf("q: %f, %f, %f, %f\n", q1.w, q1.x, q1.y, q1.z);
+		q0 = q1;
+		gyro0 = gyro1;
+		QuaterToEuler(&q0, &euler);
+		RadToDeg(&euler);
+		SendAnotc(acc, gyro0, mag, euler);
+		// printf("euler: %f, %f, %f\n", euler.x, euler.y, euler.z);	// a printf takes 4 ticks
+		
+	}
+}
+
+void task_attitude_acc(void *pdata)
+{
+	vec3d_t acc = {0, 0, 0}, gyro, mag, euler = {0, 0, 0};
+	vec4d_t q0 = {1, 0, 0, 0}, q1;
+	uint32_t t1, t2;
+	while(1)
+	{
+		GetAccData(&acc);
+		// printf("acc: %f, %f, %f\n", acc_data.x, acc_data.y, acc_data.z);
+		GetGyroData(&gyro);
+		GetMagData(&mag);
+
+		AccUpdateQuat(&q0, &q1, &acc, &gyro, 0.001);
+		// printf("q: %10f, %10f, %10f, %10f\n", q1.w, q1.x, q1.y, q1.z);
+		q0 = q1;
+		QuaterToEuler(&q0, &euler);
+		RadToDeg(&euler);
+		SendAnotc(acc, gyro, mag, euler);
+		// printf("euler: %10f, %10f, %10f\n", euler.x, euler.y, euler.z);
+		
+	}
+}
+
+void task_attitude_acc_mag(void *pdata)
+{
+	// AccCalibration(&acc_offset, &acc_scale);
+	// GyroCalibration(&gyro_offset, &gyro_filter[2]);
+	// printf("gyro_offset: %f, %f, %f\n", gyro_offset.x, gyro_offset.y, gyro_offset.z);
+	// printf("acc_offset: %f, %f, %f\n", acc_offset.x, acc_offset.y, acc_offset.z);
+	vec3d_t acc_data = {0, 0, 0}, mag_data, gyro_data, euler = {0, 0, 0};
+	vec4d_t q0 = {1, 0, 0, 0}, q1;
+	uint32_t t1, t2;
+	while(1)
+	{
+		t1 = OSTimeGet();
+		GetAccData(&acc_data);
+		Vec3Norm(&acc_data);
+		GetMagData(&mag_data);
+		Vec3Norm(&mag_data);
+		// printf("acc: %f, %f, %f\n", acc_data.x, acc_data.y, acc_data.z);
+		GetGyroData(&gyro_data);
+		AccMagUpdateQuat(&q0, &q1, &acc_data, &gyro_data, &mag_data, 0.001);
+		// printf("q: %10f, %10f, %10f, %10f\n", q1.w, q1.x, q1.y, q1.z);
+		q0 = q1;
+		QuaterToEuler(&q0, &euler);
+		// RadToDeg(&euler);
+		printf("euler: %10f, %10f, %10f\n", euler.x, euler.y, euler.z);
+		t2 = OSTimeGet();
+		OSTimeDly(10);
+	}
+}
+
 void task_attitude_fusion(void *pdata)
 {
-	Vec4d_t q0 = {1, 0, 0, 0}, q1;
-	Vec3d_t acc, mag, gyro, euler;
+	vec4d_t q0 = {1, 0, 0, 0}, q1;
+	vec3d_t acc, mag, gyro, euler;
 
 	// estimate the attitude of the first frame by acc and mag
 	for(uint8_t i=0; i<50; i++)	// takes 3s 
@@ -260,25 +261,26 @@ void task_attitude_fusion(void *pdata)
 		SendAnotc(acc, gyro, mag, euler);
 	}
 	// printf("q0: %10f, %10f, %10f, %10f\n", q0.w, q0.x, q0.y, q0.z);
-	uint32_t t[10];
-	int8_t cnt = 0;
+	volatile int16_t t[10];
+	uint16_t cnt = 0;
 	while(1)
 	{
+		t[0] = OSTimeGet();
 		GetGyroData(&gyro);
 		t[1] = OSTimeGet();
 		GetAccData(&acc);
 		t[2] = OSTimeGet();
 		GetMagData(&mag);
-		t[3] = OSTimeGet();	// 0~1 takes 4 ticks, while the rest part < 1 tick
+		t[3] = OSTimeGet();
 
-		MadgwickAHRS(&q0, acc, gyro, mag, 0.001);
+		MadgwickAHRS(&q0, acc, gyro, mag);
+		t[4] = OSTimeGet();
 		// printf("q: %10f, %10f, %10f, %10f\n", q0.w, q0.x, q0.y, q0.z);
 		QuaterToEuler(&q0, &euler);
 		RadToDeg(&euler);
-		cnt++;
-		// if(cnt % 10 == 0)
+		t[5] = OSTimeGet();
 		SendAnotc(acc, gyro, mag, euler);
-		// RadToDeg(&euler);
+		t[6] = OSTimeGet();
 		// printf("euler: %10f, %10f, %10f\n", euler.x, euler.y, euler.z);
 	}
 }
@@ -290,12 +292,12 @@ void first_task(void *pdata) {
     led_init();
 
     // create LED_ON task
-    // OSTaskCreateExt(task_led_on, (void *)0, &Task2Stk[TASK_STK_LEN - 1], 6, 6, Task2Stk, TASK_STK_LEN, (void *)0, 0);
-    // OSTaskNameSet(6, (INT8U *)"LED_ON", (INT8U *)"LED_ON_ERR");
+    OSTaskCreateExt(task_led_on, (void *)0, &Task2Stk[TASK_STK_LEN - 1], 6, 6, Task2Stk, TASK_STK_LEN, (void *)0, 0);
+    OSTaskNameSet(6, (INT8U *)"LED_ON", (INT8U *)"LED_ON_ERR");
 
     // create LED_OFF task
-    // OSTaskCreateExt(task_led_off, (void *)0, &Task3Stk[TASK_STK_LEN - 1], 7, 7, Task3Stk, TASK_STK_LEN, (void *)0, 0);
-    // OSTaskNameSet(7, (INT8U *)"LED_OFF", (INT8U *)"LED_OFF_ERR");
+    OSTaskCreateExt(task_led_off, (void *)0, &Task3Stk[TASK_STK_LEN - 1], 7, 7, Task3Stk, TASK_STK_LEN, (void *)0, 0);
+    OSTaskNameSet(7, (INT8U *)"LED_OFF", (INT8U *)"LED_OFF_ERR");
 
 	// create peripheral init task
 	OSTaskCreateExt(task_peripheral_init, (void *)0, &Task4Stk[TASK_STK_LEN - 1], 8, 8, Task4Stk, TASK_STK_LEN, (void *)0, 0);
@@ -314,8 +316,8 @@ void first_task(void *pdata) {
 	// OSTaskNameSet(11, (INT8U *)"attitude", (INT8U *)"attitude_ERR");
 	// OSTaskCreateExt(task_attitude_acc_mag, (void *)0, &Task7Stk[TASK_STK_LEN - 1], 11, 11, Task7Stk, TASK_STK_LEN, (void *)0, 0);
 	// OSTaskNameSet(11, (INT8U *)"attitude", (INT8U *)"attitude_ERR");
-	OSTaskCreateExt(task_attitude_fusion, (void *)0, &Task8Stk[TASK_STK_LEN - 1], 12, 12, Task8Stk, TASK_STK_LEN, (void *)0, 0);
-	OSTaskNameSet(12, (INT8U *)"attitude", (INT8U *)"attitude_ERR");
+	// OSTaskCreateExt(task_attitude_fusion, (void *)0, &Task8Stk[TASK_STK_LEN - 1], 12, 12, Task8Stk, TASK_STK_LEN, (void *)0, 0);
+	// OSTaskNameSet(12, (INT8U *)"attitude", (INT8U *)"attitude_ERR");
 	
     OSTaskDel(OS_PRIO_SELF);
 }

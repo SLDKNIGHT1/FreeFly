@@ -82,7 +82,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
         -ffunction-sections
 		-fno-math-errno
         -Wall
-		-O0
+		-O1
 		$<$<BOOL:${DEBUG}>:-g>
         )
 
