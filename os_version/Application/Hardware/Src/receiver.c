@@ -1,8 +1,5 @@
 #include "receiver.h"
 
-#define PPM_MAX_VAL 2001
-#define PPM_MIN_VAL 1001
-
 uint32_t PulseWidth, Period, DutyCycle;
 uint32_t ppm_val[10], ppm_cnt = 0 , First = 0;
 
@@ -35,7 +32,15 @@ void MY_NVIC_Init(uint8_t NVIC_PreemptionPriority,uint8_t NVIC_SubPriority,uint8
 
 void TIM1_init(void)
 {
+	// PA8 : TIM1CH1
+	RCC->AHB1ENR |= 1 << 0;
 	RCC->APB2ENR |= 1 << 0;
+	GPIOA->AFR[1] |= 1 << 0;
+	GPIOA->MODER &= ~(3 << (2*8));
+	GPIOA->MODER |= 2 << (2*8);//复用功能
+	GPIOA->OTYPER &=~ (1 << 8);//复用推挽输出
+	GPIOA->OSPEEDR |= 2 << (2*8);//50Mhz
+	GPIOA->PUPDR &= ~(3 << (2*8));//no pull and down
 	// 时机单元
 	TIM1->ARR = 0;
 	TIM1->CR1 &=~ (1 << 4);//递增计数
@@ -45,14 +50,6 @@ void TIM1_init(void)
 	TIM1->ARR |= 19999;
 	TIM1->EGR |= 1 << 1;//配置EGR寄存器的CC1G位，使得捕获到边沿信号后就产生一个捕获事件
 	TIM1->CR1 |= 1 << 7;//ARR使能
-	// PA8 : TIM1CH1
-	RCC->AHB1ENR |= 1 << 0;
-	GPIOA->AFR[1] |= 1 << 0;
-	GPIOA->MODER &= ~(3 << (2*8));
-	GPIOA->MODER |= 2 << (2*8);//复用功能
-	GPIOA->OTYPER &=~ (1 << 8);//复用推挽输出
-	GPIOA->OSPEEDR |= 2 << (2*8);//50Mhz
-	GPIOA->PUPDR &= ~(3 << (2*8));//no pull and down
 	// 输入通道1
 	TIM1->CCMR1 |= 1 << (2*0);//通道1的捕获信号IC1被映射到了引脚TI1上
 	TIM1->CCMR1 &=~ (3 << (2*1));//不对边沿信号进行分频处理
@@ -111,9 +108,9 @@ void TIM1_init(void)
 //		else if(DutyCycle > 20) DutyCycle = 20;
 //}
 
-uint32_t Receiver_CalcDutyCycle()
+uint32_t Receiver_CalcDutyCycle(uint8_t i)
 {
-	return 1000+(ppm_val[3]-PPM_MIN_VAL)*1000/(PPM_MAX_VAL-PPM_MIN_VAL);
+	return 1000+(ppm_val[i]-PPM_MIN_VAL)*1000/(PPM_MAX_VAL-PPM_MIN_VAL);
 }
 
 void TIM1_CC_IRQHandler()
@@ -121,10 +118,12 @@ void TIM1_CC_IRQHandler()
 	if(TIM_GetITStatus(TIM1,TIM_IT_CC1)==SET)
 	{
 		uint32_t val = TIM_GetCapture1(TIM1)+1;
+
 		if(val > 0x1000)
 		{
 			First = 1;
 		}
+
 		if(First == 1)
 		{
 			ppm_val[ppm_cnt++] = TIM_GetCapture1(TIM1)+1;
@@ -133,26 +132,14 @@ void TIM1_CC_IRQHandler()
 				ppm_cnt = 0;
 				First = 0;
 			}
-			
 		}
-//		if((TIM_GetCapture1(TIM1)+1)>2100)
-//		{
-//			Start_Flag=1;
-//		}
-//		if(Start_Flag==1)
-//		{
-//			ppm[PPM_Index]=(TIM_GetCapture1(TIM1)+1);
-//			PPM_Index++;
-//			if(PPM_Index==9)
-//			{
-//				PPM_Index=0;
-//				Start_Flag=0;
-//			}
-//		}
-		
+
 		TIM_ClearITPendingBit(TIM1,TIM_IT_CC1);
 	}
-	DutyCycle = Receiver_CalcDutyCycle();
 
+	for(uint8_t i=0; i<4; i++)
+	{
+		// ppm_val[i] = Receiver_CalcDutyCycle(i);
+	}
 }
 

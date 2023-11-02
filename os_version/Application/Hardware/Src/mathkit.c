@@ -2,17 +2,17 @@
 #include "mathkit.h"
 #include "math.h"
 
-float Vec3Modulus(Vec3d_t vec)
+float Vec3Modulus(vec3d_t vec)
 {
 	return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }
 
-float Vec4Modulus(Vec4d_t vec)
+float Vec4Modulus(vec4d_t vec)
 {
 	return sqrt(vec.w*vec.w + vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }
 
-void Vec3Norm(Vec3d_t *vec)
+void Vec3Norm(vec3d_t *vec)
 {
 	float norm = Vec3Modulus(*vec);
 	if(norm == 0)
@@ -25,7 +25,7 @@ void Vec3Norm(Vec3d_t *vec)
 }
 
 
-void Vec4Norm(Vec4d_t *vec)
+void Vec4Norm(vec4d_t *vec)
 {
 	float norm = Vec4Modulus(*vec);
 	if(norm == 0)
@@ -38,26 +38,26 @@ void Vec4Norm(Vec4d_t *vec)
 	vec->z /= norm;
 }
 
-void RadToDeg(Vec3d_t *rad)
+void RadToDeg(vec3d_t *rad)
 {
 	rad->x *= 180.0/PI;
 	rad->y *= 180.0/PI;
 	rad->z *= 180.0/PI;
 }
 
-void DegToRad(Vec3d_t *deg)
+void DegToRad(vec3d_t *deg)
 {
 	deg->x *= PI/180.0;
 	deg->y *= PI/180.0;
 	deg->z *= PI/180.0;
 }
 
-void QuaterToEuler(Vec4d_t *q, Vec3d_t *euler)
+void QuaterToEuler(vec4d_t *q, vec3d_t *euler)
 {
 	euler->x = atan2f(2*(q->w*q->x+q->y*q->z), 1-2*(q->x*q->x+q->y*q->y));
 	// euler->y = asinf(2*(q->w*q->y-q->z*q->x));
 	euler->y = -PI/2+2*atan2f(sqrt(1+2*(q->w*q->y-q->z*q->x)), sqrt(1-2*(q->w*q->y-q->z*q->x)));
-	euler->z = atan2f(2*(q->w*q->z+q->x*q->y), 1-2*(q->y*q->y+q->z*q->z));
+	euler->z = -atan2f(2*(q->w*q->z+q->x*q->y), 1-2*(q->y*q->y+q->z*q->z)); // add minus sign to according to the magnetometer coordinate
 	
     // roll  = -arcsin(2q1q3-2q0q2)
     // pitch = arctan((2q0q1+2q2q3)/(1-2q1q1-2q2q2))
@@ -228,7 +228,7 @@ void MatrixesMultiply(float *MatrixC, float *MatrixA, float *MatrixB, uint8_t ro
 	}
 }
 
-void GaussNewton_LM(Vec3d_t input[6], Vec3d_t* offset, Vec3d_t* scale)
+void GaussNewton_LM(vec3d_t input[6], vec3d_t* offset, vec3d_t* scale)
 {
 	uint8_t	cnt = 0;
 	float eps = 0.000000001;
